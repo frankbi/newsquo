@@ -19,7 +19,7 @@ def tweet_creator(subreddit_info):
 	post_dict = {}
 	post_ids = []
 	print "[bot] Getting posts from Reddit"
-	for submission in subreddit_info.get_hot(limit=1):
+	for submission in subreddit_info.get_hot(limit=5):
                 # strip_title function is defined later
 		post_dict[strip_title(submission.title)] = submission.url
 		post_ids.append(submission.id)
@@ -32,6 +32,15 @@ def tweet_creator(subreddit_info):
 		short_link = shorten(post_link)
 		mini_post_dict[post_title] = short_link 
 	return mini_post_dict, post_ids
+
+# Show quote, not speaker
+def strip_attr(string):
+    index = string.rfind("\"")
+    if string[index - 1] == ",":
+        string = "\"" + string[1 : index - 1] + ".\""
+    else:
+        string = "\"" + string[1 : index] + "\""
+    return string
 
 # No one likes long links
 def shorten(url):
@@ -73,13 +82,14 @@ def tweeter(post_dict, post_ids):
 		found = duplicate_check(post_id)
 		if found == 0:
 			print "[bot] Posting this link on twitter"
-			print post
+			print 'post: ' + post
+			print 'stripped: ' + strip_attr(post)
 			try:
-				api.update_status(status=post + " " + post_dict[post])
+			  api.update_status(status=strip_attr(post) + " " + post_dict[post])
 			except:
 				print "[BOT] Status already posted, passing"
 			# add_id_to_file(post_id)
-			# time.sleep(10)
+			time.sleep(5)
 		else:
 			print "[bot] Already posted"
 
